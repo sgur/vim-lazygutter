@@ -217,6 +217,14 @@ Add to your |vimrc|
   let g:gitgutter_all_on_focusgained = 0
 <
 
+TO USE USER SYSTEM FUNCTION (ie. |vimproc#system()|)
+
+Add to your |vimrc|
+>
+  let g:gitgutter_system_function       = 'vimproc#system'
+  let g:gitgutter_system_error_function = 'vimproc#get_last_status'
+<
+
 
 ===============================================================================
 6. FAQ                                                           *GitGutterFAQ*
