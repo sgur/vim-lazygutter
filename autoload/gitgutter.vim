@@ -56,6 +56,14 @@ function! s:directory_of_file()
   return shellescape(fnamemodify(s:file(), ':h'))
 endfunction
 
+function! s:git_dir_of_file()
+  return shellescape(finddir('.git', fnamemodify(s:file(), ':h').';'))
+endfunction
+
+function! s:git_work_tree_of_file()
+  return shellescape(fnamemodify(finddir('.git', fnamemodify(s:file(), ':h').';'), ':h'))
+endfunction
+
 function! s:discard_stdout_and_stderr()
   if !exists('s:discard')
     if &shellredir ==? '>%s 2>&1'
@@ -72,14 +80,20 @@ function! s:command_in_directory_of_file(cmd)
 endfunction
 
 function! s:is_in_a_git_repo()
-  let cmd = 'git rev-parse' . s:discard_stdout_and_stderr()
-  call system(s:command_in_directory_of_file(cmd))
+  let cmd = 'git'
+        \ . ' --git-dir ' . s:git_dir_of_file()
+        \ . ' --work-tree ' . s:git_work_tree_of_file()
+        \ . ' rev-parse' . s:discard_stdout_and_stderr()
+  call system(cmd)
   return !v:shell_error
 endfunction
 
 function! s:is_tracked_by_git()
-  let cmd = 'git ls-files --error-unmatch' . s:discard_stdout_and_stderr() . ' ' . shellescape(s:file())
-  call system(s:command_in_directory_of_file(cmd))
+  let cmd = 'git'
+        \ . ' --git-dir ' . s:git_dir_of_file()
+        \ . ' --work-tree ' . s:git_work_tree_of_file()
+        \ . ' ls-files --error-unmatch' . s:discard_stdout_and_stderr() . ' ' . shellescape(s:file())
+  call system(cmd)
   return !v:shell_error
 endfunction
 
@@ -170,11 +184,14 @@ endfunction
 " Diff processing {{{
 
 function! s:run_diff()
-  let cmd = 'git diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . shellescape(s:file())
+  let cmd = 'git'
+        \ . ' --git-dir ' . s:git_dir_of_file()
+        \ . ' --work-tree ' . s:git_work_tree_of_file()
+        \ . ' diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . shellescape(s:file())
   if s:grep_available
     let cmd .= s:grep_command
   endif
-  let diff = system(s:command_in_directory_of_file(cmd))
+  let diff = system(cmd)
   return diff
 endfunction
 
