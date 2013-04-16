@@ -84,8 +84,8 @@ function! s:is_in_a_git_repo()
         \ . ' --git-dir ' . s:git_dir_of_file()
         \ . ' --work-tree ' . s:git_work_tree_of_file()
         \ . ' rev-parse' . s:discard_stdout_and_stderr()
-  call system(cmd)
-  return !v:shell_error
+  call {g:gitgutter_system_function}(cmd)
+  return !{g:gitgutter_system_error_function}()
 endfunction
 
 function! s:is_tracked_by_git()
@@ -93,8 +93,12 @@ function! s:is_tracked_by_git()
         \ . ' --git-dir ' . s:git_dir_of_file()
         \ . ' --work-tree ' . s:git_work_tree_of_file()
         \ . ' ls-files --error-unmatch' . s:discard_stdout_and_stderr() . ' ' . shellescape(s:file())
-  call system(cmd)
-  return !v:shell_error
+  call {g:gitgutter_system_function}(cmd)
+  return !{g:gitgutter_system_error_function}()
+endfunction
+
+function! s:shell_error()
+  return v:shell_error
 endfunction
 
 function! s:differences(hunks)
@@ -191,7 +195,7 @@ function! s:run_diff()
   if s:grep_available
     let cmd .= s:grep_command
   endif
-  let diff = system(cmd)
+  let diff = {g:gitgutter_system_function}(cmd)
   return diff
 endfunction
 

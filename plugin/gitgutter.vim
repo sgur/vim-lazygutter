@@ -27,6 +27,8 @@ call s:set('g:gitgutter_sign_removed',          '_')
 call s:set('g:gitgutter_sign_modified_removed', '~_')
 call s:set('g:gitgutter_diff_args',             '')
 call s:set('g:gitgutter_escape_grep',           0)
+call s:set('g:gitgutter_system_function',       'system')
+call s:set('g:gitgutter_system_error_function', 's:shell_error')
 
 " }}}
 
