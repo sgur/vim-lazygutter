@@ -19,8 +19,7 @@ call s:set('g:gitgutter_enabled',               1)
 call s:set('g:gitgutter_signs',                 1)
 call s:set('g:gitgutter_highlight_lines',       0)
 call s:set('g:gitgutter_sign_column_always',    0)
-call s:set('g:gitgutter_on_bufenter',           1)
-call s:set('g:gitgutter_all_on_focusgained',    1)
+call s:set('g:gitgutter_eager' ,                1)
 call s:set('g:gitgutter_sign_added',            '+')
 call s:set('g:gitgutter_sign_modified',         '~')
 call s:set('g:gitgutter_sign_removed',          '_')
@@ -105,18 +104,24 @@ function! GitGutterGetHunks()
   return gitgutter#get_hunks()
 endfunction
 
+nnoremap <silent> <Plug>GitGutterNextHunk :<C-U>execute v:count1 . "GitGutterNextHunk"<CR>
+nnoremap <silent> <Plug>GitGutterPrevHunk :<C-U>execute v:count1 . "GitGutterPrevHunk"<CR>
+
+if !hasmapto('<Plug>GitGutterNextHunk') && maparg(']h', 'n') ==# ''
+  nmap ]h <Plug>GitGutterNextHunk
+  nmap [h <Plug>GitGutterPrevHunk
+endif
+
 augroup gitgutter
   autocmd!
-  if g:gitgutter_on_bufenter
+  if g:gitgutter_eager
     autocmd BufEnter,BufWritePost,FileWritePost * call GitGutter(gitgutter#current_file())
-  else
-    autocmd BufReadPost,BufWritePost,FileReadPost,FileWritePost * call GitGutter(gitgutter#current_file())
-  endif
-  if g:gitgutter_all_on_focusgained
+    autocmd TabEnter * call GitGutterAll()
     if !has('gui_win32')
       autocmd FocusGained * call GitGutterAll()
     endif
-    autocmd TabEnter * call GitGutterAll()
+  else
+    autocmd BufReadPost,BufWritePost,FileReadPost,FileWritePost * call GitGutter(gitgutter#current_file())
   endif
   autocmd ColorScheme * call gitgutter#define_sign_column_highlight() | call gitgutter#define_highlights()
 augroup END

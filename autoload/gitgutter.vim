@@ -396,12 +396,10 @@ endfunction
 
 " }}}
 
-
 " Private interface {{{
 
 function! gitgutter#gitgutter_all()
-  let buffer_ids = g:gitgutter_on_bufenter ? tabpagebuflist() : s:buffers()
-  for buffer_id in buffer_ids
+  for buffer_id in tabpagebuflist()
     call GitGutter(expand('#' . buffer_id . ':p'))
   endfor
 endfunction

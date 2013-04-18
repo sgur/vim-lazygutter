@@ -39,6 +39,8 @@ Add `Bundle 'airblade/vim-gitgutter'` to your `~/.vimrc` and then:
 
 You don't have to do anything: it just works.
 
+Please note the plugin diffs your saved buffers, i.e. the files on disk.  It produces the same result as running `git diff` on the command line.  It won't see any unsaved changes to a buffer.
+
 You can explicitly turn vim-gitgutter off and on (defaults to on):
 
 * turn off with `:GitGutterDisable`
@@ -51,16 +53,18 @@ And you can turn line highlighting on and off (defaults to off):
 * turn off with `:GitGutterLineHighlightsDisable`
 * toggle with `:GitGutterLineHighlightsToggle`.
 
-Furthermore you can jump between `[count]` hunks:
+Furthermore you can jump between hunks:
 
-* jump to next hunk: `:[count]GitGutterNextHunk [count]`
-* jump to previous hunk: `:[count]GitGutterPrevHunk [count]`.
+* jump to next hunk: `]h`
+* jump to previous hunk: `[h`.
 
-You may want to add mappings for these if you use them often.  For example:
+Both of those take a preceding count.
+
+To set your own mappings for these, for example `gh` and `gH`:
 
 ```viml
-nmap <silent> ]h :<C-U>execute v:count1 . "GitGutterNextHunk"<CR>
-nmap <silent> [h :<C-U>execute v:count1 . "GitGutterPrevHunk"<CR>
+nmap gh <Plug>GitGutterNextHunk
+nmap gH <Plug>GitGutterPrevHunk
 ```
 
 Finally, you can force vim-gitgutter to update its signs across all visible buffers with `:GitGutterAll`.
@@ -81,8 +85,7 @@ You can customise:
 * Whether or not vim-gitgutter is on initially (defaults to on)
 * Whether or not signs are shown (defaults to yes)
 * Whether or not line highlighting is on initially (defaults to off)
-* Whether or not vim-gitgutter runs on `BufEnter` (defaults to yes)
-* Whether or not vim-gitgutter runs for all visible buffers on `FocusGained` (defaults to yes)
+* Whether or not vim-gitgutter runs eagerly (defaults to yes)
 
 Please note that vim-gitgutter won't override any colours or highlights you've set in your colorscheme.
 
@@ -171,26 +174,19 @@ Add `let g:gitgutter_enabled = 0` to your `~/.vimrc`.
 Add `let g:gitgutter_highlight_lines = 1` to your `~/.vimrc`.
 
 
-#### To stop vim-gitgutter running on `BufEnter`
+#### To stop vim-gitgutter running eagerly
 
-This is on by default but causes a noticeable lag for some people.  To turn it off, add this to your `~/.vimrc`:
+By default the plugin runs every time you read a file, on `BufEnter`, `TabEnter` and `FocusGained`.
+
+This can cause a noticeable lag for some people so you can set the plugin to run instead only when you read or write a file.
+
+To turn off eager execution, add this to your `~/.vimrc`:
 
 ```
-let g:gitgutter_on_bufenter = 0
+let g:gitgutter_eager = 0
 ```
 
-If you turn it off, vim-gitgutter will instead run every time you read or write a buffer.
-
-
-#### To stop vim-gitgutter running for all visible buffers on `FocusGained`
-
-This is on by default but causes a noticeable lag for some people.  To turn it off, add this to your `~/.vimrc`:
-
-```viml
-let g:gitgutter_all_on_focusgained = 0
-```
-
-Note that this is always off with gVim on Windows due to a Vim/shell bug causing an infinite loop.
+Note that `FocusGained` cannot be used with gVim on Windows due to a Vim/shell bug causing an infinite loop.
 
 
 ### FAQ
@@ -201,11 +197,10 @@ Your colorscheme is configuring the `SignColumn` highlight group weirdly.  Pleas
 
 > There's a noticeable lag when vim-gitter runs; how can I avoid it?
 
-By default vim-gitgutter runs often so the signs are as accurate as possible.  However on some systems this causes a noticeable lag.  If you would like to trade a little accuracy for speed, add one or both of these to your `~/.vimrc`:
+By default vim-gitgutter runs often so the signs are as accurate as possible.  However on some systems this causes a noticeable lag.  If you would like to trade a little accuracy for speed, add this to your `~/.vimrc`:
 
 ```viml
-let g:gitgutter_on_bufenter = 0
-let g:gitgutter_all_on_focusgained = 0
+let g:gitgutter_eager = 0
 ```
 
 > Why is no sign shown if I delete the first line(s) in a file?
@@ -222,7 +217,7 @@ Here are some things you can check:
 
 * Your git config is compatible with the version of git which your Vim is calling (`:echo system('git --version')`).
 * Your Vim supports signs (`:echo has('signs')` should give `1`).
-* Your file is being tracked by git and has unstaged changes.
+* Your file is being tracked by git and has unstaged, saved changes.
 
 
 ### Alternatives
