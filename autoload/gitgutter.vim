@@ -400,12 +400,13 @@ endfunction
 
 function! gitgutter#gitgutter_all()
   for buffer_id in tabpagebuflist()
-    call GitGutter(expand('#' . buffer_id . ':p'))
+    call gitgutter#gitgutter(expand('#' . buffer_id . ':p'))
   endfor
 endfunction
 
-function! gitgutter#gitgutter(file)
-  call s:set_file(a:file)
+function! gitgutter#gitgutter(...)
+  let file = (a:0 > 0) ? a:1 : s:current_file()
+  call s:set_file(file)
   if s:is_active()
     call s:init()
     let diff = s:run_diff()
@@ -420,9 +421,9 @@ function! gitgutter#gitgutter(file)
         call s:remove_dummy_sign()
       endif
     endif
-    call s:clear_signs(a:file)
-    call s:find_other_signs(a:file)
-    call s:show_signs(a:file, modified_lines)
+    call s:clear_signs(file)
+    call s:find_other_signs(file)
+    call s:show_signs(file, modified_lines)
   endif
 endfunction
 
@@ -434,7 +435,7 @@ endfunction
 
 function! gitgutter#enable()
   let g:gitgutter_enabled = 1
-  call GitGutter(s:current_file())
+  call gitgutter#gitgutter(s:current_file())
 endfunction
 
 function! gitgutter#toggle()
@@ -494,10 +495,6 @@ endfunction
 
 function! gitgutter#get_hunks()
   return s:is_active() ? s:hunks : []
-endfunction
-
-function! gitgutter#current_file()
-  return s:current_file()
 endfunction
 
 function! gitgutter#define_sign_column_highlight()

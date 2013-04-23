@@ -33,55 +33,16 @@ call s:set('g:gitgutter_system_error_function', 's:shell_error')
 
 " Public interface {{{
 
-function! GitGutterAll()
-  call gitgutter#gitgutter_all()
-endfunction
-command GitGutterAll call GitGutterAll()
-
-function! GitGutter(file)
-  call gitgutter#gitgutter(a:file)
-endfunction
-command GitGutter call GitGutter(gitgutter#current_file())
-
-function! GitGutterDisable()
-  call gitgutter#disable()
-endfunction
-command GitGutterDisable call GitGutterDisable()
-
-function! GitGutterEnable()
-  call gitgutter#enable()
-endfunction
-command GitGutterEnable call GitGutterEnable()
-
-function! GitGutterToggle()
-  call gitgutter#toggle()
-endfunction
-command GitGutterToggle call GitGutterToggle()
-
-function! GitGutterLineHighlightsDisable()
-  call gitgutter#highlight_disable()
-endfunction
-command GitGutterLineHighlightsDisable call GitGutterLineHighlightsDisable()
-
-function! GitGutterLineHighlightsEnable()
-  call gitgutter#highlight_enable()
-endfunction
-command GitGutterLineHighlightsEnable call GitGutterLineHighlightsEnable()
-
-function! GitGutterLineHighlightsToggle()
-  call gitgutter#highlight_toggle()
-endfunction
-command GitGutterLineHighlightsToggle call GitGutterLineHighlightsToggle()
-
-function! GitGutterNextHunk(count)
-  call gitgutter#next_hunk(a:count)
-endfunction
-command -count=1 GitGutterNextHunk call GitGutterNextHunk(<count>)
-
-function! GitGutterPrevHunk(count)
-  call gitgutter#prev_hunk(a:count)
-endfunction
-command -count=1 GitGutterPrevHunk call GitGutterPrevHunk(<count>)
+command GitGutterAll call gitgutter#gitgutter_all()
+command GitGutter call gitgutter#gitgutter()
+command GitGutterDisable call gitgutter#disable()
+command GitGutterEnable call gitgutter#enable()
+command GitGutterToggle call gitgutter#toggle()
+command GitGutterLineHighlightsDisable call gitgutter#highlight_disable()
+command GitGutterLineHighlightsEnable call gitgutter#highlight_enable()
+command GitGutterLineHighlightsToggle call gitgutter#highlight_toggle()
+command -count=1 GitGutterNextHunk call gitgutter#next_hunk(<count>)
+command -count=1 GitGutterPrevHunk call gitgutter#prev_hunk(<count>)
 
 " Returns the git-diff hunks for the file or an empty list if there
 " aren't any hunks.
@@ -115,13 +76,13 @@ endif
 augroup gitgutter
   autocmd!
   if g:gitgutter_eager
-    autocmd BufEnter,BufWritePost,FileWritePost * call GitGutter(gitgutter#current_file())
-    autocmd TabEnter * call GitGutterAll()
+    autocmd BufEnter,BufWritePost,FileWritePost * call gitgutter#gitgutter()
+    autocmd TabEnter * call gitgutter#gitgutter_all()
     if !has('gui_win32')
-      autocmd FocusGained * call GitGutterAll()
+      autocmd FocusGained * call gitgutter#gitgutter_all()
     endif
   else
-    autocmd BufReadPost,BufWritePost,FileReadPost,FileWritePost * call GitGutter(gitgutter#current_file())
+    autocmd BufReadPost,BufWritePost,FileReadPost,FileWritePost * call gitgutter#gitgutter()
   endif
   autocmd ColorScheme * call gitgutter#define_sign_column_highlight() | call gitgutter#define_highlights()
 augroup END
