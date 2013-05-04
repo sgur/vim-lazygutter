@@ -391,7 +391,9 @@ function! s:add_dummy_sign()
 endfunction
 
 function! s:remove_dummy_sign()
-  exe ":sign unplace" s:dummy_sign_id "file=" . s:file()
+  if exists('s:dummy_sign_id')
+    exe ":sign unplace" s:dummy_sign_id "file=" . s:file()
+  endif
 endfunction
 
 " }}}
