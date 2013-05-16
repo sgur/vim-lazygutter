@@ -214,6 +214,7 @@ Add to your |vimrc|
 >
   let g:gitgutter_system_function       = 'vimproc#system'
   let g:gitgutter_system_error_function = 'vimproc#get_last_status'
+  let g:gitgutter_shellescape_function  = 'vimproc#shellescape'
 <
 
 
