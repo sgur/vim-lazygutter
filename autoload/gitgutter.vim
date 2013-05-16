@@ -54,30 +54,25 @@ endfunction
 
 function! s:discard_stdout_and_stderr()
   if !exists('s:discard')
-    if &shellredir ==? '>%s 2>&1'
-      let s:discard = ' > /dev/null 2>&1'
-    else
-      let s:discard = ' >& /dev/null'
-    endif
+    let null_dev = has('win32') ? 'NUL' : '/dev/null'
+    let s:discard = stridx(&shellredir, '%s') > -1
+          \ ? printf(&shellredir, null_dev)
+          \ : ' >& ' . null_dev
   endif
   return s:discard
 endfunction
 
 function! s:is_in_a_git_repo(file)
-  let cmd = 'git'
-        \ . ' --git-dir ' . s:git_dir_of_file(a:file)
-        \ . ' --work-tree ' . s:git_work_tree_of_file(a:file)
-        \ . ' rev-parse' . s:discard_stdout_and_stderr()
-  call {g:gitgutter_system_function}(cmd)
+  call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s'
+        \ , s:git_dir_of_file(a:file), s:git_work_tree_of_file(a:file)
+        \ , s:discard_stdout_and_stderr()))
   return !{g:gitgutter_system_error_function}()
 endfunction
 
 function! s:is_tracked_by_git(file)
-  let cmd = 'git'
-        \ . ' --git-dir ' . s:git_dir_of_file(a:file)
-        \ . ' --work-tree ' . s:git_work_tree_of_file(a:file)
-        \ . ' ls-files --error-unmatch' . s:discard_stdout_and_stderr() . ' ' . {g:gitgutter_shellescape_function}(s:file())
-  call {g:gitgutter_system_function}(cmd)
+  call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s ls-files --error-unmatch %s %s'
+        \ , s:git_dir_of_file(a:file), s:git_work_tree_of_file(a:file)
+        \ , s:discard_stdout_and_stderr(), {g:gitgutter_shellescape_function}(a:file)))
   return !{g:gitgutter_system_error_function}()
 endfunction
 
@@ -172,15 +167,13 @@ endfunction
 " Diff processing {{{
 
 function! s:run_diff(file)
-  let cmd = 'git'
-        \ . ' --git-dir ' . s:git_dir_of_file(a:file)
-        \ . ' --work-tree ' . s:git_work_tree_of_file(a:file)
-        \ . ' diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . {g:gitgutter_shellescape_function}(s:file())
-  if s:grep_available
-    let cmd .= s:grep_command
-  endif
-  let diff = {g:gitgutter_system_function}(cmd)
-  return diff
+  return {g:gitgutter_system_function}
+        \ (printf('git --git-dir %s --work-tree %s diff --no-ext-diff --no-color -U0 %s %s %s'
+        \ , s:git_dir_of_file(a:file)
+        \ , s:git_work_tree_of_file(a:file)
+        \ , g:gitgutter_diff_args
+        \ , {g:gitgutter_shellescape_function}(a:file)
+        \ , s:grep_available ? s:grep_command : ''))
 endfunction
 
 function! s:parse_diff(diff)
@@ -308,7 +301,7 @@ endfunction
 " Sign processing {{{
 
 function! s:clear_signs(file_name)
-  if exists('s:sign_ids') && has_key(s:sign_ids, a:file_name)
+  if has_key(s:sign_ids, a:file_name)
     for id in s:sign_ids[a:file_name]
       exe ":sign unplace" id "file=" . a:file_name
     endfor
