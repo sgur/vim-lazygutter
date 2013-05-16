@@ -53,15 +53,15 @@ function! s:exists_file()
 endfunction
 
 function! s:directory_of_file()
-  return shellescape(fnamemodify(s:file(), ':h'))
+  return {g:gitgutter_shellescape_function}(fnamemodify(s:file(), ':h'))
 endfunction
 
 function! s:git_dir_of_file()
-  return shellescape(finddir('.git', fnamemodify(s:file(), ':h').';'))
+  return {g:gitgutter_shellescape_function}(finddir('.git', fnamemodify(s:file(), ':h').';'))
 endfunction
 
 function! s:git_work_tree_of_file()
-  return shellescape(fnamemodify(finddir('.git', fnamemodify(s:file(), ':h').';'), ':h'))
+  return {g:gitgutter_shellescape_function}(fnamemodify(finddir('.git', fnamemodify(s:file(), ':h').';'), ':h'))
 endfunction
 
 function! s:discard_stdout_and_stderr()
@@ -92,7 +92,8 @@ function! s:is_tracked_by_git()
   let cmd = 'git'
         \ . ' --git-dir ' . s:git_dir_of_file()
         \ . ' --work-tree ' . s:git_work_tree_of_file()
-        \ . ' ls-files --error-unmatch' . s:discard_stdout_and_stderr() . ' ' . shellescape(s:file())
+        \ . ' ls-files --error-unmatch' . s:discard_stdout_and_stderr()
+        \ . ' ' . {g:gitgutter_shellescape_function}(s:file())
   call {g:gitgutter_system_function}(cmd)
   return !{g:gitgutter_system_error_function}()
 endfunction
@@ -191,7 +192,7 @@ function! s:run_diff()
   let cmd = 'git'
         \ . ' --git-dir ' . s:git_dir_of_file()
         \ . ' --work-tree ' . s:git_work_tree_of_file()
-        \ . ' diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . shellescape(s:file())
+        \ . ' diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . {g:gitgutter_shellescape_function}(s:file())
   if s:grep_available
     let cmd .= s:grep_command
   endif
