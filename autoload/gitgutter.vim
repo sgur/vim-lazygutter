@@ -1,7 +1,3 @@
-
-" Initialisation {{{
-let s:file = ''
-
 let s:highlight_lines = g:gitgutter_highlight_lines
 
 function! s:init()
@@ -32,36 +28,28 @@ endfunction
 
 " Utility {{{
 
-function! s:is_active()
-  return g:gitgutter_enabled && s:exists_file() && s:is_in_a_git_repo() && s:is_tracked_by_git()
+function! s:is_active(file)
+  return g:gitgutter_enabled && s:exists_file(a:file) && s:is_in_a_git_repo(a:file) && s:is_tracked_by_git(a:file)
 endfunction
 
 function! s:current_file()
   return expand('%:p')
 endfunction
 
-function! s:set_file(file)
-  let s:file = a:file
+function! s:exists_file(file)
+  return filereadable(a:file)
 endfunction
 
-function! s:file()
-  return s:file
+function! s:find_dir_of_file(file)
+  return finddir('.git', fnamemodify(a:file, ':h').';')
 endfunction
 
-function! s:exists_file()
-  return filereadable(s:file())
+function! s:git_dir_of_file(file)
+  return {g:gitgutter_shellescape_function}(s:find_dir_of_file(a:file))
 endfunction
 
-function! s:directory_of_file()
-  return {g:gitgutter_shellescape_function}(fnamemodify(s:file(), ':h'))
-endfunction
-
-function! s:git_dir_of_file()
-  return {g:gitgutter_shellescape_function}(finddir('.git', fnamemodify(s:file(), ':h').';'))
-endfunction
-
-function! s:git_work_tree_of_file()
-  return {g:gitgutter_shellescape_function}(fnamemodify(finddir('.git', fnamemodify(s:file(), ':h').';'), ':h'))
+function! s:git_work_tree_of_file(file)
+  return {g:gitgutter_shellescape_function}(fnamemodify(s:find_dir_of_file(a:file), ':h'))
 endfunction
 
 function! s:discard_stdout_and_stderr()
@@ -75,25 +63,20 @@ function! s:discard_stdout_and_stderr()
   return s:discard
 endfunction
 
-function! s:command_in_directory_of_file(cmd)
-  return 'cd ' . s:directory_of_file() . ' && ' . a:cmd
-endfunction
-
-function! s:is_in_a_git_repo()
+function! s:is_in_a_git_repo(file)
   let cmd = 'git'
-        \ . ' --git-dir ' . s:git_dir_of_file()
-        \ . ' --work-tree ' . s:git_work_tree_of_file()
+        \ . ' --git-dir ' . s:git_dir_of_file(a:file)
+        \ . ' --work-tree ' . s:git_work_tree_of_file(a:file)
         \ . ' rev-parse' . s:discard_stdout_and_stderr()
   call {g:gitgutter_system_function}(cmd)
   return !{g:gitgutter_system_error_function}()
 endfunction
 
-function! s:is_tracked_by_git()
+function! s:is_tracked_by_git(file)
   let cmd = 'git'
-        \ . ' --git-dir ' . s:git_dir_of_file()
-        \ . ' --work-tree ' . s:git_work_tree_of_file()
-        \ . ' ls-files --error-unmatch' . s:discard_stdout_and_stderr()
-        \ . ' ' . {g:gitgutter_shellescape_function}(s:file())
+        \ . ' --git-dir ' . s:git_dir_of_file(a:file)
+        \ . ' --work-tree ' . s:git_work_tree_of_file(a:file)
+        \ . ' ls-files --error-unmatch' . s:discard_stdout_and_stderr() . ' ' . {g:gitgutter_shellescape_function}(s:file())
   call {g:gitgutter_system_function}(cmd)
   return !{g:gitgutter_system_error_function}()
 endfunction
@@ -188,10 +171,10 @@ endfunction
 
 " Diff processing {{{
 
-function! s:run_diff()
+function! s:run_diff(file)
   let cmd = 'git'
-        \ . ' --git-dir ' . s:git_dir_of_file()
-        \ . ' --work-tree ' . s:git_work_tree_of_file()
+        \ . ' --git-dir ' . s:git_dir_of_file(a:file)
+        \ . ' --work-tree ' . s:git_work_tree_of_file(a:file)
         \ . ' diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . {g:gitgutter_shellescape_function}(s:file())
   if s:grep_available
     let cmd .= s:grep_command
@@ -386,14 +369,14 @@ function! s:is_other_sign(line_number)
   return index(s:other_signs, a:line_number) == -1 ? 0 : 1
 endfunction
 
-function! s:add_dummy_sign()
+function! s:add_dummy_sign(file)
   let last_line = line('$')
-  exe ":sign place" s:dummy_sign_id "line=" . (last_line + 1) "name=GitGutterDummy file=" . s:file()
+  exe ":sign place" s:dummy_sign_id "line=" . (last_line + 1) "name=GitGutterDummy file=" . a:file
 endfunction
 
-function! s:remove_dummy_sign()
+function! s:remove_dummy_sign(file)
   if exists('s:dummy_sign_id')
-    exe ":sign unplace" s:dummy_sign_id "file=" . s:file()
+    exe ":sign unplace" s:dummy_sign_id "file=" . a:file
   endif
 endfunction
 
@@ -409,19 +392,18 @@ endfunction
 
 function! gitgutter#gitgutter(...)
   let file = (a:0 > 0) ? a:1 : s:current_file()
-  call s:set_file(file)
-  if s:is_active()
+  if s:is_active(file)
     call s:init()
-    let diff = s:run_diff()
+    let diff = s:run_diff(file)
     let s:hunks = s:parse_diff(diff)
     let modified_lines = s:process_hunks(s:hunks)
     if g:gitgutter_sign_column_always
-      call s:add_dummy_sign()
+      call s:add_dummy_sign(file)
     else
       if s:differences(s:hunks)
-        call s:add_dummy_sign()  " prevent flicker
+        call s:add_dummy_sign(file)  " prevent flicker
       else
-        call s:remove_dummy_sign()
+        call s:remove_dummy_sign(file)
       endif
     endif
     call s:clear_signs(file)
@@ -432,7 +414,7 @@ endfunction
 
 function! gitgutter#disable()
   let g:gitgutter_enabled = 0
-  call s:clear_signs(s:file())
+  call s:clear_signs(s:current_file())
   call s:remove_dummy_sign()
 endfunction
 
@@ -443,9 +425,9 @@ endfunction
 
 function! gitgutter#toggle()
   if g:gitgutter_enabled
-    call GitGutterDisable()
+    call gitgutter#disable()
   else
-    call GitGutterEnable()
+    call gitgutter#enable()
   endif
 endfunction
 
@@ -464,8 +446,8 @@ function! gitgutter#highlight_toggle()
   call s:define_sign_line_highlights()
 endfunction
 
-function! gitgutter#next_hunk(count)
-  if s:is_active()
+function! gitgutter#next_hunk(file, count)
+  if s:is_active(a:file)
     let current_line = line('.')
     let hunk_count = 0
     for hunk in s:hunks
@@ -480,8 +462,8 @@ function! gitgutter#next_hunk(count)
   endif
 endfunction
 
-function! gitgutter#prev_hunk(count)
-  if s:is_active()
+function! gitgutter#prev_hunk(file, count)
+  if s:is_active(a:file)
     let current_line = line('.')
     let hunk_count = 0
     for hunk in reverse(copy(s:hunks))
@@ -496,8 +478,8 @@ function! gitgutter#prev_hunk(count)
   endif
 endfunction
 
-function! gitgutter#get_hunks()
-  return s:is_active() ? s:hunks : []
+function! gitgutter#get_hunks(file)
+  return s:is_active(a:file) ? s:hunks : []
 endfunction
 
 function! gitgutter#define_sign_column_highlight()

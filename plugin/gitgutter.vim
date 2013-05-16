@@ -42,8 +42,8 @@ command GitGutterToggle call gitgutter#toggle()
 command GitGutterLineHighlightsDisable call gitgutter#highlight_disable()
 command GitGutterLineHighlightsEnable call gitgutter#highlight_enable()
 command GitGutterLineHighlightsToggle call gitgutter#highlight_toggle()
-command -count=1 GitGutterNextHunk call gitgutter#next_hunk(<count>)
-command -count=1 GitGutterPrevHunk call gitgutter#prev_hunk(<count>)
+command -count=1 GitGutterNextHunk call gitgutter#next_hunk(expand('%'), <count>)
+command -count=1 GitGutterPrevHunk call gitgutter#prev_hunk(expand('%'), <count>)
 
 " Returns the git-diff hunks for the file or an empty list if there
 " aren't any hunks.
