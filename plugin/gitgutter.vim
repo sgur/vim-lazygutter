@@ -29,6 +29,7 @@ call s:set('g:gitgutter_escape_grep',           0)
 call s:set('g:gitgutter_system_function',       'system')
 call s:set('g:gitgutter_system_error_function', 's:shell_error')
 call s:set('g:gitgutter_shellescape_function',  'shellescape')
+call s:set('g:gitgutter_sign_readonly_always',  1)
 
 " }}}
 

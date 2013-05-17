@@ -385,6 +385,10 @@ endfunction
 
 function! gitgutter#gitgutter(...)
   let file = (a:0 > 0) ? a:1 : s:current_file()
+  if g:gitgutter_sign_readonly_always
+        \ && (!filereadable(file) || getbufvar(bufnr(file), '&readonly') == 1)
+    return
+  end
   if s:is_active(file)
     call s:init()
     let diff = s:run_diff(file)
