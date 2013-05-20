@@ -1,3 +1,7 @@
+let s:save_cpo = &cpo
+set cpo&vim
+
+
 let s:highlight_lines = g:gitgutter_highlight_lines
 
 function! s:init()
@@ -487,3 +491,7 @@ function! gitgutter#define_highlights()
   call s:define_highlights()
 endfunction
 " }}}
+
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
