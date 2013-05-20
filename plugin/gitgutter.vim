@@ -6,30 +6,24 @@ let g:loaded_gitgutter = 1
 " Initialisation {{{
 
 function! s:set(var, default)
-  if !exists(a:var)
-    if type(a:default)
-      exe 'let' a:var '=' string(a:default)
-    else
-      exe 'let' a:var '=' a:default
-    endif
-  endif
+  let g:{a:var} = get(g:, a:var, a:default)
 endfunction
 
-call s:set('g:gitgutter_enabled',               1)
-call s:set('g:gitgutter_signs',                 1)
-call s:set('g:gitgutter_highlight_lines',       0)
-call s:set('g:gitgutter_sign_column_always',    0)
-call s:set('g:gitgutter_eager' ,                1)
-call s:set('g:gitgutter_sign_added',            '+')
-call s:set('g:gitgutter_sign_modified',         '~')
-call s:set('g:gitgutter_sign_removed',          '_')
-call s:set('g:gitgutter_sign_modified_removed', '~_')
-call s:set('g:gitgutter_diff_args',             '')
-call s:set('g:gitgutter_escape_grep',           0)
-call s:set('g:gitgutter_system_function',       'system')
-call s:set('g:gitgutter_system_error_function', 's:shell_error')
-call s:set('g:gitgutter_shellescape_function',  'shellescape')
-call s:set('g:gitgutter_sign_readonly_always',  1)
+call s:set('gitgutter_enabled',               1)
+call s:set('gitgutter_signs',                 1)
+call s:set('gitgutter_highlight_lines',       0)
+call s:set('gitgutter_sign_column_always',    0)
+call s:set('gitgutter_eager' ,                1)
+call s:set('gitgutter_sign_added',            '+')
+call s:set('gitgutter_sign_modified',         '~')
+call s:set('gitgutter_sign_removed',          '_')
+call s:set('gitgutter_sign_modified_removed', '~_')
+call s:set('gitgutter_diff_args',             '')
+call s:set('gitgutter_escape_grep',           0)
+call s:set('gitgutter_system_function',       'system')
+call s:set('gitgutter_system_error_function', 's:shell_error')
+call s:set('gitgutter_shellescape_function',  'shellescape')
+call s:set('gitgutter_sign_readonly_always',  1)
 
 " }}}
 
