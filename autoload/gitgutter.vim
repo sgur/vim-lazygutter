@@ -33,7 +33,9 @@ endfunction
 " Utility {{{
 
 function! s:is_active(file)
-  return g:gitgutter_enabled && s:exists_file(a:file) && s:is_in_a_git_repo(a:file) && s:is_tracked_by_git(a:file)
+  return g:gitgutter_enabled && s:exists_file(a:file)
+        \ && s:is_in_a_git_repo(a:file)
+        \ && (g:gitgutter_eager ? s:is_tracked_by_git(a:file) : 1)
 endfunction
 
 function! s:current_file()
