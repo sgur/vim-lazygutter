@@ -69,6 +69,9 @@ function! s:discard_stdout_and_stderr()
 endfunction
 
 function! s:is_in_a_git_repo(file)
+  if exists('g:loaded_fugitive')
+    return fugitive#is_git_dir(exists('b:git_dir') ? b:git_dir : s:find_dir_of_file(a:file))
+  endif
   call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s'
         \ , s:git_dir_of_file(a:file), s:git_work_tree_of_file(a:file)
         \ , s:discard_stdout_and_stderr()))
