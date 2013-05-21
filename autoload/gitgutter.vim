@@ -1,7 +1,6 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-
 let s:highlight_lines = g:gitgutter_highlight_lines
 
 function! s:init()
@@ -29,10 +28,12 @@ endfunction
 
 " Utility {{{
 
-function! s:is_active(file)
+function! s:is_active(file, scm)
+  if empty(a:scm)
+    return 0
+  endif
   return g:gitgutter_enabled && s:exists_file(a:file)
-        \ && s:is_in_a_git_repo(a:file)
-        \ && (g:gitgutter_eager ? s:is_tracked_by_git(a:file) : 1)
+        \ && (g:gitgutter_eager ? gitgutter#{a:scm}#is_tracked_by(a:file) : 1)
 endfunction
 
 function! s:current_file()
@@ -43,43 +44,8 @@ function! s:exists_file(file)
   return filereadable(a:file)
 endfunction
 
-function! s:find_dir_of_file(file)
-  return finddir('.git', fnamemodify(a:file, ':h').';')
-endfunction
-
-function! s:git_dir_of_file(file)
-  return {g:gitgutter_shellescape_function}(s:find_dir_of_file(a:file))
-endfunction
-
-function! s:git_work_tree_of_file(file)
-  return {g:gitgutter_shellescape_function}(fnamemodify(s:find_dir_of_file(a:file), ':h'))
-endfunction
-
-function! s:discard_stdout_and_stderr()
-  if !exists('s:discard')
-    let null_dev = has('win32') ? 'NUL' : '/dev/null'
-    let s:discard = stridx(&shellredir, '%s') > -1
-          \ ? printf(&shellredir, null_dev)
-          \ : ' >& ' . null_dev
-  endif
-  return s:discard
-endfunction
-
-function! s:is_in_a_git_repo(file)
-  if exists('g:loaded_fugitive')
-    return fugitive#is_git_dir(exists('b:git_dir') ? b:git_dir : s:find_dir_of_file(a:file))
-  endif
-  call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s'
-        \ , s:git_dir_of_file(a:file), s:git_work_tree_of_file(a:file)
-        \ , s:discard_stdout_and_stderr()))
-  return !{g:gitgutter_system_error_function}()
-endfunction
-
-function! s:is_tracked_by_git(file)
-  call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s ls-files --error-unmatch %s %s'
-        \ , s:git_dir_of_file(a:file), s:git_work_tree_of_file(a:file)
-        \ , s:discard_stdout_and_stderr(), {g:gitgutter_shellescape_function}(a:file)))
-  return !{g:gitgutter_system_error_function}()
+function! s:repo_type_of_file(file)
+  return gitgutter#git#is_in_a_repo(a:file) ? 'git' : ''
 endfunction
 
 function! s:shell_error()
@@ -172,11 +138,11 @@ endfunction
 
 " Diff processing {{{
 
-function! s:run_diff(file)
+function! s:run_diff(file, scm)
   let diff = {g:gitgutter_system_function}
         \ (printf('git --git-dir %s --work-tree %s diff --no-ext-diff --no-color -U0 %s %s'
-        \ , s:git_dir_of_file(a:file)
-        \ , s:git_work_tree_of_file(a:file)
+        \ , gitgutter#{a:scm}#dir_of_file(a:file)
+        \ , gitgutter#{a:scm}#work_tree_of_file(a:file)
         \ , g:gitgutter_diff_args
         \ , {g:gitgutter_shellescape_function}(a:file)))
   return filter(split(diff, '\r\n\|\n\|\r'), 'v:val =~ "^@@"')
@@ -395,9 +361,10 @@ function! gitgutter#gitgutter(...)
         \ && (!filereadable(file) || getbufvar(bufnr(file), '&readonly') == 1)
     return
   end
-  if s:is_active(file)
+  let scm = s:repo_type_of_file(file)
+  if s:is_active(file, scm)
     call s:init()
-    let diff = s:run_diff(file)
+    let diff = s:run_diff(file, scm)
     let s:hunks = s:parse_diff(diff)
     let modified_lines = s:process_hunks(s:hunks)
     if g:gitgutter_sign_column_always
@@ -450,7 +417,7 @@ function! gitgutter#highlight_toggle()
 endfunction
 
 function! gitgutter#next_hunk(file, count)
-  if s:is_active(a:file)
+  if s:is_active(a:file, s:repo_type_of_file(a:file))
     let current_line = line('.')
     let hunk_count = 0
     for hunk in s:hunks
@@ -466,7 +433,7 @@ function! gitgutter#next_hunk(file, count)
 endfunction
 
 function! gitgutter#prev_hunk(file, count)
-  if s:is_active(a:file)
+  if s:is_active(a:file, s:repo_type_of_file(a:file))
     let current_line = line('.')
     let hunk_count = 0
     for hunk in reverse(copy(s:hunks))
@@ -482,7 +449,7 @@ function! gitgutter#prev_hunk(file, count)
 endfunction
 
 function! gitgutter#get_hunks(file)
-  return s:is_active(a:file) ? s:hunks : []
+  return s:is_active(a:file, s:repo_type_of_file(a:file)) ? s:hunks : []
 endfunction
 
 function! gitgutter#define_sign_column_highlight()
