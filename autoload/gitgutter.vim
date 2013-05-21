@@ -33,7 +33,6 @@ function! s:is_active(file, scm)
     return 0
   endif
   return g:gitgutter_enabled && s:exists_file(a:file)
-        \ && (g:gitgutter_eager ? gitgutter#{a:scm}#is_tracked_by(a:file) : 1)
 endfunction
 
 function! s:current_file()
@@ -45,7 +44,9 @@ function! s:exists_file(file)
 endfunction
 
 function! s:repo_type_of_file(file)
-  return gitgutter#git#is_in_a_repo(a:file) ? 'git' : ''
+  return gitgutter#git#is_in_a_repo(a:file) ? 'git'
+        \ : gitgutter#hg#is_in_a_repo(a:file) ? 'hg'
+        \ : ''
 endfunction
 
 function! s:shell_error()
@@ -139,13 +140,7 @@ endfunction
 " Diff processing {{{
 
 function! s:run_diff(file, scm)
-  let diff = {g:gitgutter_system_function}
-        \ (printf('git --git-dir %s --work-tree %s diff --no-ext-diff --no-color -U0 %s %s'
-        \ , gitgutter#{a:scm}#dir_of_file(a:file)
-        \ , gitgutter#{a:scm}#work_tree_of_file(a:file)
-        \ , g:gitgutter_diff_args
-        \ , {g:gitgutter_shellescape_function}(a:file)))
-  return filter(split(diff, '\r\n\|\n\|\r'), 'v:val =~ "^@@"')
+  return gitgutter#{a:scm}#run_diff(a:file)
 endfunction
 
 function! s:parse_diff(diff)
