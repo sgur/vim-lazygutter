@@ -21,9 +21,6 @@ function! s:init()
     let s:other_signs = []
     let s:dummy_sign_id = 153
 
-    let s:grep_available = executable('grep')
-    let s:grep_command = ' | ' . (g:gitgutter_escape_grep ? '\grep' : 'grep') . ' -e "^@@ "'
-
     let g:gitgutter_initialised = 1
   endif
 endfunction
@@ -176,19 +173,19 @@ endfunction
 " Diff processing {{{
 
 function! s:run_diff(file)
-  return {g:gitgutter_system_function}
-        \ (printf('git --git-dir %s --work-tree %s diff --no-ext-diff --no-color -U0 %s %s %s'
+  let diff = {g:gitgutter_system_function}
+        \ (printf('git --git-dir %s --work-tree %s diff --no-ext-diff --no-color -U0 %s %s'
         \ , s:git_dir_of_file(a:file)
         \ , s:git_work_tree_of_file(a:file)
         \ , g:gitgutter_diff_args
-        \ , {g:gitgutter_shellescape_function}(a:file)
-        \ , s:grep_available ? s:grep_command : ''))
+        \ , {g:gitgutter_shellescape_function}(a:file)))
+  return filter(split(diff, '\r\n\|\n\|\r'), 'v:val =~ "^@@"')
 endfunction
 
 function! s:parse_diff(diff)
   let hunk_re = '^@@ -\(\d\+\),\?\(\d*\) +\(\d\+\),\?\(\d*\) @@'
   let hunks = []
-  for line in split(a:diff, '\n')
+  for line in a:diff
     let matches = matchlist(line, hunk_re)
     if len(matches) > 0
       let from_line  = str2nr(matches[1])
