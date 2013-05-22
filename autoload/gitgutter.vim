@@ -443,8 +443,9 @@ function! gitgutter#prev_hunk(file, count)
   endif
 endfunction
 
-function! gitgutter#get_hunks(file)
-  return s:is_active(a:file, s:repo_type_of_file(a:file)) ? s:hunks : []
+function! gitgutter#get_hunks()
+  let file = s:current_file()
+  return s:is_active(file, s:repo_type_of_file(file)) ? s:hunks : []
 endfunction
 
 function! gitgutter#define_sign_column_highlight()
