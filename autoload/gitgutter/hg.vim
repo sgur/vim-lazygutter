@@ -16,10 +16,14 @@ function! s:discard_stdout_and_stderr()
 endfunction
 
 function! gitgutter#hg#is_in_a_repo(file)
-  call {g:gitgutter_system_function}(printf('hg --cwd %s status %s'
-        \ , gitgutter#hg#work_tree_of_file(a:file)
-        \ , s:discard_stdout_and_stderr()))
-  return {g:gitgutter_system_error_function}() == 0
+  if exists('b:hg_dir')
+    return b:hg_dir != '' ? b:hg_dir : 0
+  endif
+  call {g:gitgutter_system_function}(printf('hg --cwd %s status'
+        \ , gitgutter#hg#work_tree_of_file(a:file)))
+  let result = {g:gitgutter_system_error_function}() == 0
+  let b:hg_dir = result ? s:find_dir_of_file(a:file) : ''
+  return result
 endfunction
 
 function! gitgutter#hg#dir_of_file(file)
