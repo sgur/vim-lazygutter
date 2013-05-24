@@ -2,7 +2,7 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 function! s:find_dir_of_file(file)
-  return finddir('.git', fnamemodify(a:file, ':h').';')
+  return finddir('.git', fnamemodify(a:file, ':p:h').';')
 endfunction
 
 function! s:discard_stdout_and_stderr()
@@ -16,14 +16,14 @@ function! s:discard_stdout_and_stderr()
 endfunction
 
 function! gitgutter#git#is_in_a_repo(file)
-  if exists('b:gitgutter_dir')
-    return b:gitgutter_dir != '' ? 1 : 0
+  if exists('b:gitgutter.git_dir')
+    return b:gitgutter.git_dir != '' ? 1 : 0
   endif
   call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s'
         \ , gitgutter#git#dir_of_file(a:file), gitgutter#git#work_tree_of_file(a:file)
         \ , s:discard_stdout_and_stderr()))
   let result = {g:gitgutter_system_error_function}() == 0
-  let b:gitgutter_dir = result ? s:find_dir_of_file(a:file) : ''
+  let b:gitgutter.git_dir = result ? s:find_dir_of_file(a:file) : ''
   return result
 endfunction
 
