@@ -16,13 +16,15 @@ function! s:discard_stdout_and_stderr()
 endfunction
 
 function! gitgutter#git#is_in_a_repo(file)
-  if exists('g:loaded_fugitive')
-    return fugitive#is_git_dir(exists('b:git_dir') ? b:git_dir : s:find_dir_of_file(a:file))
+  if exists('b:gitgutter_dir')
+    return b:gitgutter_dir != '' ? 1 : 0
   endif
   call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s'
         \ , gitgutter#git#dir_of_file(a:file), gitgutter#git#work_tree_of_file(a:file)
         \ , s:discard_stdout_and_stderr()))
-  return !{g:gitgutter_system_error_function}()
+  let result = {g:gitgutter_system_error_function}() == 0
+  let b:gitgutter_dir = result ? s:find_dir_of_file(a:file) : ''
+  return result
 endfunction
 
 function! gitgutter#git#dir_of_file(file)
