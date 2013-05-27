@@ -44,9 +44,12 @@ function! s:exists_file(file)
 endfunction
 
 function! s:repo_type_of_file(file)
-  return gitgutter#git#is_in_a_repo(a:file) ? 'git'
-        \ : gitgutter#hg#is_in_a_repo(a:file) ? 'hg'
-        \ : ''
+  let scm_types = filter(
+        \{ 'git' : gitgutter#git#is_in_a_repo(a:file)
+        \, 'hg'  : gitgutter#hg#is_in_a_repo(a:file)
+        \}, 'v:val != 0')
+  call filter(scm_types, 'v:val == ' . min(values(scm_types)))
+  return empty(scm_types) ? '' : keys(scm_types)[0]
 endfunction
 
 function! s:shell_error()
