@@ -19,6 +19,7 @@ function! s:init()
     let s:sign_ids = {}  " key: filename, value: list of sign ids
     let s:other_signs = []
     let s:dummy_sign_id = 153
+    let s:path_distance = {}
 
     let g:gitgutter_initialised = 1
   endif
@@ -44,12 +45,14 @@ function! s:exists_file(file)
 endfunction
 
 function! s:repo_type_of_file(file)
-  let scm_types = filter(
-        \{ 'git' : gitgutter#git#is_in_a_repo(a:file)
-        \, 'hg'  : gitgutter#hg#is_in_a_repo(a:file)
-        \}, 'v:val != 0')
-  call filter(scm_types, 'v:val == ' . min(values(scm_types)))
-  return empty(scm_types) ? '' : keys(scm_types)[0]
+  let distance = has_key(s:path_distance, a:file)
+        \ ? s:path_distance[a:file] : filter(
+        \ { 'git' : gitgutter#git#is_in_a_repo(a:file)
+        \ , 'hg'  : gitgutter#hg#is_in_a_repo(a:file)
+        \ }, 'v:val != 0')
+  let s:path_distance[a:file] = distance
+  let scm = filter(copy(distance), 'v:val == ' . min(values(distance)))
+  return empty(scm) ? '' : keys(scm)[0]
 endfunction
 
 function! s:differences(hunks)
@@ -355,17 +358,16 @@ function! gitgutter#gitgutter(...)
         \ && (!filereadable(file) || getbufvar(bufnr(file), '&readonly') == 1)
     return
   end
-  let b:gitgutter = {}
+  call s:init()
   let scm = s:repo_type_of_file(file)
   if s:is_active(file, scm)
-    call s:init()
     let diff = s:run_diff(file, scm)
-    let b:gitgutter.hunks = s:parse_diff(diff)
-    let modified_lines = s:process_hunks(b:gitgutter.hunks)
+    let s:hunks = s:parse_diff(diff)
+    let modified_lines = s:process_hunks(s:hunks)
     if g:gitgutter_sign_column_always
       call s:add_dummy_sign(file)
     else
-      if s:differences(b:gitgutter.hunks)
+      if s:differences(s:hunks)
         call s:add_dummy_sign(file)  " prevent flicker
       else
         call s:remove_dummy_sign(file)
@@ -416,7 +418,7 @@ function! gitgutter#next_hunk(file, count)
   if s:is_active(a:file, s:repo_type_of_file(a:file))
     let current_line = line('.')
     let hunk_count = 0
-    for hunk in b:gitgutter.hunks
+    for hunk in s:hunks
       if hunk[2] > current_line
         let hunk_count += 1
         if hunk_count == a:count
@@ -432,7 +434,7 @@ function! gitgutter#prev_hunk(file, count)
   if s:is_active(a:file, s:repo_type_of_file(a:file))
     let current_line = line('.')
     let hunk_count = 0
-    for hunk in reverse(copy(b:gitgutter.hunks))
+    for hunk in reverse(copy(s:hunks))
       if hunk[2] < current_line
         let hunk_count += 1
         if hunk_count == a:count
@@ -446,7 +448,7 @@ endfunction
 
 function! gitgutter#get_hunks()
   let file = s:current_file()
-  return s:is_active(file, s:repo_type_of_file(file)) ? b:gitgutter.hunks : []
+  return s:is_active(file, s:repo_type_of_file(file)) ? s:hunks : []
 endfunction
 
 function! gitgutter#define_sign_column_highlight()

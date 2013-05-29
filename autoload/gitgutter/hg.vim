@@ -20,14 +20,10 @@ function! s:discard_stdout_and_stderr()
 endfunction
 
 function! gitgutter#hg#is_in_a_repo(file)
-  if exists('b:gitgutter.is_hg_dir')
-    return b:gitgutter.is_hg_dir
-  endif
   call {g:gitgutter_system_function}(printf('hg --cwd %s status'
         \ , gitgutter#hg#work_tree_of_file(a:file)))
   let result = {g:gitgutter_system_error_function}() == 0
-  let b:gitgutter.is_hg_dir = result ? s:length_from_source(a:file) : 0
-  return b:gitgutter.is_hg_dir
+  return result ? s:length_from_source(a:file) : 0
 endfunction
 
 function! gitgutter#hg#dir_of_file(file)
