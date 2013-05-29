@@ -5,6 +5,14 @@ let g:loaded_gitgutter = 1
 
 " Initialisation {{{
 
+function! s:SID_PREFIX()
+  return matchstr(expand('<sfile>'), '<SNR>\d\+_')
+endfunction
+
+function! s:shell_error()
+  return v:shell_error
+endfunction
+
 function! s:set(var, default)
   let g:{a:var} = get(g:, a:var, a:default)
 endfunction
@@ -21,7 +29,7 @@ call s:set('gitgutter_sign_modified_removed', '~_')
 call s:set('gitgutter_diff_args',             '')
 call s:set('gitgutter_escape_grep',           0)
 call s:set('gitgutter_system_function',       'system')
-call s:set('gitgutter_system_error_function', 's:shell_error')
+call s:set('gitgutter_system_error_function', s:SID_PREFIX() .'shell_error')
 call s:set('gitgutter_shellescape_function',  'shellescape')
 call s:set('gitgutter_sign_readonly_always',  1)
 

@@ -52,10 +52,6 @@ function! s:repo_type_of_file(file)
   return empty(scm_types) ? '' : keys(scm_types)[0]
 endfunction
 
-function! s:shell_error()
-  return v:shell_error
-endfunction
-
 function! s:differences(hunks)
   return len(a:hunks) != 0
 endfunction
