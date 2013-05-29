@@ -20,6 +20,9 @@ function! s:discard_stdout_and_stderr()
 endfunction
 
 function! gitgutter#hg#is_in_a_repo(file)
+  if !executable('hg')
+    return 0
+  endif
   call {g:gitgutter_system_function}(printf('hg --cwd %s status'
         \ , gitgutter#hg#work_tree_of_file(a:file)))
   let result = {g:gitgutter_system_error_function}() == 0

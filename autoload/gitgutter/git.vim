@@ -20,6 +20,9 @@ function! s:discard_stdout_and_stderr()
 endfunction
 
 function! gitgutter#git#is_in_a_repo(file)
+  if !executable('git')
+    return 0
+  endif
   call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s'
         \ , gitgutter#git#dir_of_file(a:file), gitgutter#git#work_tree_of_file(a:file)
         \ , s:discard_stdout_and_stderr()))
