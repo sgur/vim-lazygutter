@@ -379,8 +379,9 @@ endfunction
 
 function! gitgutter#disable()
   let g:gitgutter_enabled = 0
-  call s:clear_signs(s:current_file())
-  call s:remove_dummy_sign()
+  let file = s:current_file()
+  call s:clear_signs(file)
+  call s:remove_dummy_sign(file)
 endfunction
 
 function! gitgutter#enable()
