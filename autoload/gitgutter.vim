@@ -45,6 +45,9 @@ function! s:exists_file(file)
 endfunction
 
 function! s:repo_type_of_file(file)
+  if empty(a:file)
+    return ''
+  endif
   let distance = has_key(s:path_distance, a:file)
         \ ? s:path_distance[a:file] : filter(
         \ { 'git' : gitgutter#git#is_in_a_repo(a:file)
