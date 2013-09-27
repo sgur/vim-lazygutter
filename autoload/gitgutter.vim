@@ -164,7 +164,20 @@ function! s:parse_diff(diff)
   return hunks
 endfunction
 
+let s:hunk_summary = {'added': 0, 'removed': 0, 'modified': 0}
+
+function! s:hunk_summary.init()
+  let self.added = 0
+  let self.removed = 0
+  let self.modified = 0
+endfunction
+
+function! s:hunk_summary.get()
+  return [self.added, self.modified, self.removed]
+endfunction
+
 function! s:process_hunks(hunks)
+  call s:hunk_summary.init()
   let modified_lines = []
   for hunk in a:hunks
     call extend(modified_lines, s:process_hunk(hunk))
@@ -181,18 +194,25 @@ function! s:process_hunk(hunk)
 
   if s:is_added(from_count, to_count)
     call s:process_added(modifications, from_count, to_count, to_line)
+    let s:hunk_summary.added += to_count
 
   elseif s:is_removed(from_count, to_count)
     call s:process_removed(modifications, from_count, to_count, to_line)
+    let s:hunk_summary.removed += to_count
 
   elseif s:is_modified(from_count, to_count)
     call s:process_modified(modifications, from_count, to_count, to_line)
+    let s:hunk_summary.modified += to_count
 
   elseif s:is_modified_and_added(from_count, to_count)
     call s:process_modified_and_added(modifications, from_count, to_count, to_line)
+    let s:hunk_summary.added += (to_count - from_count)
+    let s:hunk_summary.modified += from_count
 
   elseif s:is_modified_and_removed(from_count, to_count)
     call s:process_modified_and_removed(modifications, from_count, to_count, to_line)
+    let s:hunk_summary.modified += to_count
+    let s:hunk_summary.removed += from_count - to_count
 
   endif
   return modifications
@@ -452,6 +472,10 @@ endfunction
 function! gitgutter#get_hunks()
   let file = s:current_file()
   return s:is_active(file, s:repo_type_of_file(file)) ? s:hunks : []
+endfunction
+
+function! gitgutter#hunk_summary()
+  return s:hunk_summary.get()
 endfunction
 
 function! gitgutter#define_sign_column_highlight()

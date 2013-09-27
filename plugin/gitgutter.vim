@@ -68,6 +68,13 @@ function! GitGutterGetHunks()
   return gitgutter#get_hunks()
 endfunction
 
+" Returns an array that contains a summary of the current hunk status.
+" The format is [ added, modified, removed ], where each value represents
+" the number of lines added/modified/removed respectively.
+function! GitGutterGetHunkSummary()
+  return gitgutter#hunk_summary()
+endfunction
+
 nnoremap <silent> <Plug>GitGutterNextHunk :<C-U>execute v:count1 . "GitGutterNextHunk"<CR>
 nnoremap <silent> <Plug>GitGutterPrevHunk :<C-U>execute v:count1 . "GitGutterPrevHunk"<CR>
 
