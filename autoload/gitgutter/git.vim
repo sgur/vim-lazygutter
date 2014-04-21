@@ -23,9 +23,10 @@ function! gitgutter#git#is_in_a_repo(file)
   if !executable('git')
     return 0
   endif
-  call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s'
+  call {g:gitgutter_system_function}(printf('git --git-dir %s --work-tree %s rev-parse %s 2> %s'
         \ , gitgutter#git#dir_of_file(a:file), gitgutter#git#work_tree_of_file(a:file)
-        \ , s:discard_stdout_and_stderr()))
+        \ , s:discard_stdout_and_stderr()
+        \ , has('win32') ? 'NUL' : '/dev/null'))
   let result = {g:gitgutter_system_error_function}() == 0
   return result ? s:length_from_source(a:file) : 0
 endfunction
