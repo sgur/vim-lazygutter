@@ -3,18 +3,24 @@ let s:hunk_re = '^@@ -\(\d\+\),\?\(\d*\) +\(\d\+\),\?\(\d*\) @@'
 
 function! gitgutter#diff#run_diff()
   " Wrap compound command in parentheses to make Windows happy.
-  let cmd = '(git ls-files --error-unmatch ' . gitgutter#utility#shellescape(gitgutter#utility#filename()) . ' && ('
 
-  let cmd .= 'git diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . gitgutter#utility#shellescape(gitgutter#utility#filename())
+  let fname = gitgutter#utility#shellescape(gitgutter#utility#filename())
+  let cmd = ''
+  for repo in ['hg', 'git']
+    if gitgutter#{repo}#is_in_a_repo(fname)
+      let cmd = gitgutter#{repo}#cmd(fname)
+    endif
+  endfor
 
-  let cmd .= '))'
-
-  let diff = gitgutter#utility#system(gitgutter#utility#command_in_directory_of_file(cmd))
-
-  if gitgutter#utility#shell_error()
-    " A shell error indicates the file is not tracked by git (unless something
-    " bizarre is going on).
-    throw 'diff failed'
+  if !empty(cmd)
+    let diff = gitgutter#utility#system(gitgutter#utility#command_in_directory_of_file(cmd))
+    if gitgutter#utility#shell_error()
+      " A shell error indicates the file is not tracked by git (unless something
+      " bizarre is going on).
+      throw 'diff failed'
+    endif
+  else
+    let diff = ''
   endif
 
   return diff

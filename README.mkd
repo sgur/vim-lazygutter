@@ -10,6 +10,7 @@ Changes from original:
 
 * Remove realtime sign update
 * Remove external grep feature
+* Add support for mercurial repository
 
 Features:
 
@@ -25,7 +26,7 @@ Features:
 
 Constraints:
 
-* Supports git only.
+* Supports git and mercurial.
 
 
 ### Screenshot
