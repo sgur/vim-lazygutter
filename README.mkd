@@ -4,6 +4,8 @@ A Vim plugin which shows a git diff in the 'gutter' (sign column).  It shows whe
 
 **This is forked version !! Original is [airblade/vim-gitgutter](https://github.com/airblade/vim-gitgutter)**
 
+**If you prefer full-featured version of gitgutter, Use original**
+
 Changes from original:
 
 * Remove realtime sign update
