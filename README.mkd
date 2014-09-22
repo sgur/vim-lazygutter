@@ -2,6 +2,15 @@
 
 A Vim plugin which shows a git diff in the 'gutter' (sign column).  It shows whether each line has been added, modified, and where lines have been removed.  You can also stage and revert individual hunks.
 
+**This is forked version !! Original is [airblade/vim-gitgutter](https://github.com/airblade/vim-gitgutter)**
+
+**If you prefer full-featured version of gitgutter, Use original**
+
+Changes from original:
+
+* Remove realtime sign update
+* Remove external grep feature
+
 Features:
 
 * Shows signs for added, modified, and removed lines.
@@ -47,8 +56,6 @@ Add `Plugin 'airblade/vim-gitgutter'` to your `~/.vimrc` and then:
 
 * either within Vim: `:PluginInstall`
 * or in your shell: `vim +PluginInstall +qall`
-
-If you are on Windows you may find the command prompt pops up briefly every time vim-gitgutter runs.  You can avoid this by installing both [vim-misc](https://github.com/xolox/vim-misc) and [vim-shell](https://github.com/xolox/vim-shell).  If you have those two plugins but don't want vim-gitgutter to use them, you can opt out with `let g:gitgutter_avoid_cmd_prompt_on_windows = 0` in your `~/.vimrc`.
 
 
 ### Usage
@@ -137,7 +144,6 @@ By default the signs are updated as follows:
 
 | Event                     | Reason for update                    | Configuration          |
 |---------------------------|--------------------------------------|------------------------|
-| Stop typing               | So the signs are real time           | `g:gitgutter_realtime` |
 | Switch buffer             | To notice change to git index        | `g:gitgutter_eager`    |
 | Switch tab                | To notice change to git index        | `g:gitgutter_eager`    |
 | Focus the GUI             | To notice change to git index        | `g:gitgutter_eager` (not gVim on Windows) |
@@ -150,11 +156,8 @@ The length of time Vim waits after you stop typing before it triggers the plugin
 If you experience a lag, you can trade speed for accuracy:
 
 ```viml
-let g:gitgutter_realtime = 0
 let g:gitgutter_eager = 0
 ```
-
-Note the realtime updating requires Vim 7.3.105 or higher.
 
 
 ### Customisation
@@ -167,11 +170,9 @@ You can customise:
 * Line highlights
 * Extra arguments for `git diff`
 * Key mappings
-* Whether or not to escape `grep` (default to no)
 * Whether or not vim-gitgutter is on initially (defaults to on)
 * Whether or not signs are shown (defaults to yes)
 * Whether or not line highlighting is on initially (defaults to off)
-* Whether or not vim-gitgutter runs in "realtime" (defaults to yes)
 * Whether or not vim-gitgutter runs eagerly (defaults to yes)
 
 Please note that vim-gitgutter won't override any colours or highlights you've set in your colorscheme.
@@ -248,14 +249,6 @@ let g:gitgutter_map_keys = 0
 See above for configuring maps for hunk-jumping and staging/reverting.
 
 
-#### Whether or not to escape `grep`
-
-If you have `grep` aliased to something which changes its output, for example `grep --color=auto -H`, you will need to tell vim-gitgutter to use raw grep:
-
-```viml
-let g:gitgutter_escape_grep = 1
-```
-
 #### To turn off vim-gitgutter by default
 
 Add `let g:gitgutter_enabled = 0` to your `~/.vimrc`.
@@ -282,7 +275,6 @@ Your colorscheme is configuring the `SignColumn` highlight group weirdly.  Pleas
 By default vim-gitgutter runs often so the signs are as accurate as possible.  However on some systems this causes a noticeable lag.  If you would like to trade a little accuracy for speed, add this to your `~/.vimrc`:
 
 ```viml
-let g:gitgutter_realtime = 0
 let g:gitgutter_eager = 0
 ```
 

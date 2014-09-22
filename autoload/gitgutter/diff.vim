@@ -1,40 +1,15 @@
-let s:grep_available = executable('grep')
-let s:grep_command = ' | ' . (g:gitgutter_escape_grep ? '\grep' : 'grep') . ' -e ' . gitgutter#utility#shellescape('^@@ ')
 let s:hunk_re = '^@@ -\(\d\+\),\?\(\d*\) +\(\d\+\),\?\(\d*\) @@'
 
 
-function! gitgutter#diff#run_diff(realtime, use_external_grep)
+function! gitgutter#diff#run_diff()
   " Wrap compound command in parentheses to make Windows happy.
   let cmd = '(git ls-files --error-unmatch ' . gitgutter#utility#shellescape(gitgutter#utility#filename()) . ' && ('
 
-  if a:realtime
-    let blob_name = ':' . gitgutter#utility#shellescape(gitgutter#utility#file_relative_to_repo_root())
-    let blob_file = tempname()
-    let cmd .= 'git show ' . blob_name . ' > ' . blob_file .
-          \ ' && diff -U0 ' . g:gitgutter_diff_args . ' ' . blob_file . ' - '
-  else
-    let cmd .= 'git diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . gitgutter#utility#shellescape(gitgutter#utility#filename())
-  endif
-
-  if a:use_external_grep && s:grep_available
-    let cmd .= s:grep_command
-  endif
-
-  if (a:use_external_grep && s:grep_available) || a:realtime
-    " grep exits with 1 when no matches are found; diff exits with 1 when
-    " differences are found.  However we want to treat non-matches and
-    " differences as non-erroneous behaviour; so we OR the command with one
-    " which always exits with success (0).
-    let cmd.= ' || exit 0'
-  endif
+  let cmd .= 'git diff --no-ext-diff --no-color -U0 ' . g:gitgutter_diff_args . ' ' . gitgutter#utility#shellescape(gitgutter#utility#filename())
 
   let cmd .= '))'
 
-  if a:realtime
-    let diff = gitgutter#utility#system(gitgutter#utility#command_in_directory_of_file(cmd), gitgutter#utility#buffer_contents())
-  else
-    let diff = gitgutter#utility#system(gitgutter#utility#command_in_directory_of_file(cmd))
-  endif
+  let diff = gitgutter#utility#system(gitgutter#utility#command_in_directory_of_file(cmd))
 
   if gitgutter#utility#shell_error()
     " A shell error indicates the file is not tracked by git (unless something
@@ -183,7 +158,7 @@ function! gitgutter#diff#process_modified_and_removed(modifications, from_count,
 endfunction
 
 function! gitgutter#diff#generate_diff_for_hunk(hunk, keep_header)
-  let diff = gitgutter#diff#discard_hunks(gitgutter#diff#run_diff(0, 0), a:hunk, a:keep_header)
+  let diff = gitgutter#diff#discard_hunks(gitgutter#diff#run_diff(), a:hunk, a:keep_header)
   if !a:keep_header
     " Discard summary line
     let diff = join(split(diff, '\n')[1:-1], "\n")
