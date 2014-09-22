@@ -11,6 +11,7 @@ Changes from original:
 * Remove realtime sign update
 * Remove external grep feature
 * Add support for mercurial repository
+* Lazy update of git gutter signs
 
 Features:
 
@@ -27,6 +28,7 @@ Features:
 Constraints:
 
 * Supports git and mercurial.
+* +clientserver required for lazy update.
 
 
 ### Screenshot
@@ -48,12 +50,12 @@ If you don't have a preferred installation method, I recommend installing [patho
 
 ```
 cd ~/.vim/bundle
-git clone git://github.com/airblade/vim-gitgutter.git
+git clone https://github.com/sgur/vim-gitgutter.git
 ```
 
 Or for [Vundle](https://github.com/gmarik/vundle) users:
 
-Add `Plugin 'airblade/vim-gitgutter'` to your `~/.vimrc` and then:
+Add `Plugin 'sgur/vim-gitgutter'` to your `~/.vimrc` and then:
 
 * either within Vim: `:PluginInstall`
 * or in your shell: `vim +PluginInstall +qall`
@@ -151,8 +153,6 @@ By default the signs are updated as follows:
 | Read a file into a buffer | To display initial signs             | [always]               |
 | Save a buffer             | So non-realtime signs are up to date | [always]               |
 | Change a file outside Vim | To notice `git stash`                | [always]               |
-
-The length of time Vim waits after you stop typing before it triggers the plugin is governed by the setting `updatetime`.  This defaults to `4000` milliseconds which is rather too long.  I recommend around `750` milliseconds but it depends on your system and your preferences.  Note that in terminal Vim an `updatetime` of less than approximately `1000` milliseconds can lead to random highlighting glitches; the lower the `updatetime`, the more glitches.  This is due to a bug in Vim.
 
 If you experience a lag, you can trade speed for accuracy:
 

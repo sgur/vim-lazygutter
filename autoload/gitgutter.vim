@@ -13,26 +13,9 @@ endfunction
 function! gitgutter#process_buffer(file)
   call gitgutter#utility#set_file(a:file)
   if gitgutter#utility#is_active()
-    if g:gitgutter_sign_column_always
-      call gitgutter#sign#add_dummy_sign()
-    endif
     try
       if gitgutter#utility#has_fresh_changes(a:file)
-        let diff = gitgutter#diff#run_diff()
-        call gitgutter#hunk#set_hunks(gitgutter#diff#parse_diff(diff))
-        let modified_lines = gitgutter#diff#process_hunks(gitgutter#hunk#hunks())
-
-        if len(modified_lines) > g:gitgutter_max_signs
-          call gitgutter#utility#warn('exceeded maximum number of signs (configured by g:gitgutter_max_signs).')
-          call gitgutter#sign#clear_signs(a:file)
-          return
-        endif
-
-        if g:gitgutter_signs || g:gitgutter_highlight_lines
-          call gitgutter#sign#update_signs(a:file, modified_lines)
-        endif
-
-        call gitgutter#utility#save_last_seen_change(a:file)
+        call gitgutter#diff#run_diff()
       endif
     catch /diff failed/
       call gitgutter#hunk#reset()
@@ -40,6 +23,41 @@ function! gitgutter#process_buffer(file)
   else
     call gitgutter#hunk#reset()
   endif
+endfunction
+
+function! gitgutter#post_hook(result, status, bufnr)
+  if a:status
+    throw 'diff failed'
+  endif
+
+  call gitgutter#highlight#init()
+
+  if g:gitgutter_sign_column_always
+    call gitgutter#sign#add_dummy_sign()
+  endif
+
+  if a:bufnr != bufnr('%')
+    echohl WarningMsg
+    echomsg 'Processed buffer mismatched:' bufname(a:bufnr)
+    echohl NONE
+    return
+  endif
+  let diff = a:result
+  let file = fnamemodify(bufname(a:bufnr), ':p')
+  call gitgutter#hunk#set_hunks(gitgutter#diff#parse_diff(diff))
+  let modified_lines = gitgutter#diff#process_hunks(gitgutter#hunk#hunks())
+
+  if len(modified_lines) > g:gitgutter_max_signs
+    call gitgutter#utility#warn('exceeded maximum number of signs (configured by g:gitgutter_max_signs).')
+    call gitgutter#sign#clear_signs(file)
+    return
+  endif
+
+  if g:gitgutter_signs || g:gitgutter_highlight_lines
+    call gitgutter#sign#update_signs(file, modified_lines)
+  endif
+
+  call gitgutter#utility#save_last_seen_change(file)
 endfunction
 
 function! gitgutter#disable()
