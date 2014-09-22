@@ -4,22 +4,21 @@ function! gitgutter#all()
   for buffer_id in tabpagebuflist()
     let file = expand('#' . buffer_id . ':p')
     if !empty(file)
-      call gitgutter#process_buffer(file, 0)
+      call gitgutter#process_buffer(file)
     endif
   endfor
 endfunction
 
 " file: (string) the file to process.
-" realtime: (boolean) when truthy, do a realtime diff; otherwise do a disk-based diff.
-function! gitgutter#process_buffer(file, realtime)
+function! gitgutter#process_buffer(file)
   call gitgutter#utility#set_file(a:file)
   if gitgutter#utility#is_active()
     if g:gitgutter_sign_column_always
       call gitgutter#sign#add_dummy_sign()
     endif
     try
-      if !a:realtime || gitgutter#utility#has_fresh_changes(a:file)
-        let diff = gitgutter#diff#run_diff(a:realtime || gitgutter#utility#has_unsaved_changes(a:file), 1)
+      if gitgutter#utility#has_fresh_changes(a:file)
+        let diff = gitgutter#diff#run_diff(1)
         call gitgutter#hunk#set_hunks(gitgutter#diff#parse_diff(diff))
         let modified_lines = gitgutter#diff#process_hunks(gitgutter#hunk#hunks())
 
