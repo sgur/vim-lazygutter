@@ -7,6 +7,7 @@ A Vim plugin which shows a git diff in the 'gutter' (sign column).  It shows whe
 Changes from original:
 
 * Remove realtime sign update
+* Remove external grep feature
 
 Features:
 
@@ -169,7 +170,6 @@ You can customise:
 * Line highlights
 * Extra arguments for `git diff`
 * Key mappings
-* Whether or not to escape `grep` (default to no)
 * Whether or not vim-gitgutter is on initially (defaults to on)
 * Whether or not signs are shown (defaults to yes)
 * Whether or not line highlighting is on initially (defaults to off)
@@ -248,14 +248,6 @@ let g:gitgutter_map_keys = 0
 
 See above for configuring maps for hunk-jumping and staging/reverting.
 
-
-#### Whether or not to escape `grep`
-
-If you have `grep` aliased to something which changes its output, for example `grep --color=auto -H`, you will need to tell vim-gitgutter to use raw grep:
-
-```viml
-let g:gitgutter_escape_grep = 1
-```
 
 #### To turn off vim-gitgutter by default
 

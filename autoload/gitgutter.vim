@@ -18,7 +18,7 @@ function! gitgutter#process_buffer(file)
     endif
     try
       if gitgutter#utility#has_fresh_changes(a:file)
-        let diff = gitgutter#diff#run_diff(1)
+        let diff = gitgutter#diff#run_diff()
         call gitgutter#hunk#set_hunks(gitgutter#diff#parse_diff(diff))
         let modified_lines = gitgutter#diff#process_hunks(gitgutter#hunk#hunks())
 

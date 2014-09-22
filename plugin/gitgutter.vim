@@ -34,7 +34,6 @@ call s:set('g:gitgutter_sign_removed',          '_')
 call s:set('g:gitgutter_sign_removed_first_line', '‾')
 call s:set('g:gitgutter_sign_modified_removed', '~_')
 call s:set('g:gitgutter_diff_args',             '')
-call s:set('g:gitgutter_escape_grep',           0)
 call s:set('g:gitgutter_map_keys',              1)
 call s:set('g:gitgutter_avoid_cmd_prompt_on_windows', 1)
 
@@ -47,7 +46,7 @@ call gitgutter#highlight#define_signs()
 " Primary functions {{{
 
 command GitGutterAll call gitgutter#all()
-command GitGutter    call gitgutter#process_buffer(gitgutter#utility#current_file(), 0)
+command GitGutter    call gitgutter#process_buffer(gitgutter#utility#current_file())
 
 command GitGutterDisable call gitgutter#disable()
 command GitGutterEnable  call gitgutter#enable()
