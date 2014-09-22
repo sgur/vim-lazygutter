@@ -11,6 +11,7 @@ Changes from original:
 * Remove realtime sign update
 * Remove external grep feature
 * Add support for mercurial repository
+* Lazy update of git gutter signs
 
 Features:
 
@@ -27,6 +28,7 @@ Features:
 Constraints:
 
 * Supports git and mercurial.
+* +clientserver required for lazy update.
 
 
 ### Screenshot

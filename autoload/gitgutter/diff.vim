@@ -13,17 +13,8 @@ function! gitgutter#diff#run_diff()
   endfor
 
   if !empty(cmd)
-    let diff = gitgutter#utility#system(gitgutter#utility#command_in_directory_of_file(cmd))
-    if gitgutter#utility#shell_error()
-      " A shell error indicates the file is not tracked by git (unless something
-      " bizarre is going on).
-      throw 'diff failed'
-    endif
-  else
-    let diff = ''
+    call gitgutter#shell#system(gitgutter#utility#command_in_directory_of_file(cmd), 'gitgutter#post_hook')
   endif
-
-  return diff
 endfunction
 
 function! gitgutter#diff#parse_diff(diff)
