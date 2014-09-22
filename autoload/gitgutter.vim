@@ -13,9 +13,6 @@ endfunction
 function! gitgutter#process_buffer(file)
   call gitgutter#utility#set_file(a:file)
   if gitgutter#utility#is_active()
-    if g:gitgutter_sign_column_always
-      call gitgutter#sign#add_dummy_sign()
-    endif
     try
       if gitgutter#utility#has_fresh_changes(a:file)
         call gitgutter#diff#run_diff()
@@ -32,8 +29,17 @@ function! gitgutter#post_hook(result, status, bufnr)
   if a:status
     throw 'diff failed'
   endif
+
+  call gitgutter#highlight#init()
+
+  if g:gitgutter_sign_column_always
+    call gitgutter#sign#add_dummy_sign()
+  endif
+
   if a:bufnr != bufnr('%')
-    echohl WarningMsg | echomsg 'Invalid target:' bufname('%') | echohl NONE
+    echohl WarningMsg
+    echomsg 'Processed buffer mismatched:' bufname(a:bufnr)
+    echohl NONE
     return
   endif
   let diff = a:result

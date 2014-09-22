@@ -36,10 +36,6 @@ call s:set('g:gitgutter_sign_modified_removed', '~_')
 call s:set('g:gitgutter_diff_args',             '')
 call s:set('g:gitgutter_map_keys',              1)
 
-call gitgutter#highlight#define_sign_column_highlight()
-call gitgutter#highlight#define_highlights()
-call gitgutter#highlight#define_signs()
-
 " }}}
 
 " Primary functions {{{

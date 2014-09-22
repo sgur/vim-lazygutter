@@ -109,3 +109,11 @@ function! gitgutter#highlight#match_highlight(highlight, pattern)
   endif
   return matches[1]
 endfunction
+
+function! gitgutter#highlight#init()
+endfunction
+
+call gitgutter#highlight#define_sign_column_highlight()
+call gitgutter#highlight#define_highlights()
+call gitgutter#highlight#define_signs()
+
