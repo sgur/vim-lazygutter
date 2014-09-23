@@ -13,13 +13,7 @@ endfunction
 function! gitgutter#process_buffer(file)
   call gitgutter#utility#set_file(a:file)
   if gitgutter#utility#is_active()
-    try
-      if gitgutter#utility#has_fresh_changes(a:file)
-        call gitgutter#diff#run_diff()
-      endif
-    catch /diff failed/
-      call gitgutter#hunk#reset()
-    endtry
+    call gitgutter#diff#run_diff()
   else
     call gitgutter#hunk#reset()
   endif
@@ -28,6 +22,8 @@ endfunction
 function! gitgutter#post_hook(result, status, bufnr)
   if a:status
     throw 'diff failed'
+    call gitgutter#hunk#reset()
+    return
   endif
 
   call gitgutter#highlight#init()
@@ -37,9 +33,7 @@ function! gitgutter#post_hook(result, status, bufnr)
   endif
 
   if a:bufnr != bufnr('%')
-    echohl WarningMsg
-    echomsg 'Processed buffer mismatched:' bufname(a:bufnr)
-    echohl NONE
+    call gitgutter#utility#warn(printf('buffer mismatched: %s', bufname(a:bufnr)))
     return
   endif
   let diff = a:result
