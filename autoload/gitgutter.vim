@@ -24,17 +24,19 @@ endfunction
 
 function! gitgutter#post_hook(result, status, bufnr)
   if a:status
-    throw 'diff failed'
+    call gitgutter#utility#warn('diff failed')
+    call gitgutter#hunk#reset()
+    return
+  endif
+
+  if a:bufnr != bufnr('%')
+    call gitgutter#utility#warn(printf('buffer mismatched: %s', bufname(a:bufnr)))
     call gitgutter#hunk#reset()
     return
   endif
 
   call gitgutter#highlight#init()
 
-  if a:bufnr != bufnr('%')
-    call gitgutter#utility#warn(printf('buffer mismatched: %s', bufname(a:bufnr)))
-    return
-  endif
   let diff = a:result
   let file = fnamemodify(bufname(a:bufnr), ':p')
   call gitgutter#hunk#set_hunks(gitgutter#diff#parse_diff(diff))
