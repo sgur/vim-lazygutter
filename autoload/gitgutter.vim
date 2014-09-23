@@ -219,7 +219,7 @@ function! gitgutter#preview_hunk()
     if !&previewwindow
       execute 'bo ' . &previewheight . ' new'
       set previewwindow
-      setlocal filetype=diff buftype=nowrite
+      setlocal filetype=diff buftype=nofile bufhidden=delete noswapfile
     endif
 
     execute "%delete_"
