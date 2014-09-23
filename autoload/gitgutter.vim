@@ -13,6 +13,9 @@ endfunction
 function! gitgutter#process_buffer(file)
   call gitgutter#utility#set_file(a:file)
   if gitgutter#utility#is_active()
+    if g:gitgutter_sign_column_always
+      call gitgutter#sign#add_dummy_sign()
+    endif
     call gitgutter#diff#run_diff()
   else
     call gitgutter#hunk#reset()
@@ -27,10 +30,6 @@ function! gitgutter#post_hook(result, status, bufnr)
   endif
 
   call gitgutter#highlight#init()
-
-  if g:gitgutter_sign_column_always
-    call gitgutter#sign#add_dummy_sign()
-  endif
 
   if a:bufnr != bufnr('%')
     call gitgutter#utility#warn(printf('buffer mismatched: %s', bufname(a:bufnr)))
