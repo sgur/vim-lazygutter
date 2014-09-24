@@ -164,3 +164,11 @@ function! gitgutter#sign#next_sign_id()
   let s:next_sign_id += 1
   return next_id
 endfunction
+
+
+function! s:define_dummy_sign()
+  sign define GitGutterDummy
+endfunction
+
+" Applied once
+call s:define_dummy_sign()

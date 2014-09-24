@@ -36,7 +36,6 @@ function! gitgutter#highlight#define_signs()
   sign define GitGutterLineRemoved
   sign define GitGutterLineRemovedFirstLine
   sign define GitGutterLineModifiedRemoved
-  sign define GitGutterDummy
 
   call gitgutter#highlight#define_sign_text()
   call gitgutter#highlight#define_sign_text_highlights()
