@@ -99,7 +99,7 @@ endfunction
 " The format is [ added, modified, removed ], where each value represents
 " the number of lines added/modified/removed respectively.
 function! GitGutterGetHunkSummary()
-  return gitgutter#hunk#summary()
+  return gitgutter#utility#current_file() is? gitgutter#utility#file() ? gitgutter#hunk#summary() : []
 endfunction
 
 " }}}
