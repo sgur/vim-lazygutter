@@ -48,30 +48,18 @@ function! s:system(cmd, handler)
     let target = a:cmd . s:shellredir(temp_file)
   endif
   let exec_cmd = '(' . (s:is_win ? 'title ' . temp_id . '& ' : '') . target . ')'
-  let result_var = s:is_win ? '\%ERRORLEVEL\%' : '$?'
-  let vim_cmd = printf('%s --servername %s --remote-expr "GitGutter__OnDone(''%s'', %s)"'
-        \ , s:vim_executable(), v:servername, temp_id, result_var)
+  let vim_cmd = printf('%s --servername %s --remote-expr "GitGutter__OnDone(''%s'')"'
+        \ , s:vim_executable(), v:servername, temp_id)
   if s:is_win
     silent execute printf('!start /b cmd /c "%s & %s >NUL"', exec_cmd, vim_cmd)
   else
-    silent execute printf('! (echo ASYNC %s > /dev/null ; %s ; %s  >/dev/null) &', temp_id, exec_cmd, vim_cmd)
+    silent execute printf('! (%s ; %s  >/dev/null) &', exec_cmd, vim_cmd)
   endif
   return temp_id
 endfunction
 
-function! s:default_handler(result, status)
-  let more = &more
-  set nomore
-  echo join(a:result, "\n")
-  let &more = more
-endfunction
-
 function! s:SID()
   return matchstr(expand('<sfile>'), '<SNR>\d\+_')
-endfunction
-
-function! s:default_handler_name()
-  return s:SID() . 'default_handler'
 endfunction
 
 function! s:split_lines(string)
@@ -83,35 +71,36 @@ function! s:system_fallback(cmd, handler)
     let result = ''
     for l in a:cmd
       let result .= system(l)
+      if v:shell_error
+        return v:shell_error
+      endif
     endfor
   else
     let result = system(a:cmd)
+    if v:shell_error
+      return v:shell_error
+    endif
   endif
-  if !v:shell_error
-    call call(a:handler, [result, v:shell_error, bufnr('%')])
-  endif
-  return '+clientserver not found'
+  call call(a:handler, [result, bufnr('%')])
+  return 0
 endfunction
 
-function! GitGutter__OnDone(temp_id, ret_code)
+function! GitGutter__OnDone(temp_id)
   let recv = s:receivers[a:temp_id]
   let recv.is_finished = 1
   let temp_file = recv.temp_file
   call call(recv.handler,
         \ [ join(readfile(temp_file), "\n")
-        \ , eval(a:ret_code)
         \ , recv.bufnr])
   call delete(temp_file)
   call remove(s:receivers, a:temp_id)
   return ""
 endfunction
 
-function! gitgutter#shell#system(cmd, ...)
-  let handler = a:0 > 0 ? a:1 : s:default_handler_name()
-  if !has('clientserver') || empty(v:servername) " fallback
-    return s:system_fallback(a:cmd, handler)
-  endif
-  return s:system(a:cmd, handler)
+function! gitgutter#shell#system(cmd, handler)
+  return !has('clientserver') || empty(v:servername)
+        \ ? s:system_fallback(a:cmd, a:handler)
+        \ : s:system(a:cmd, a:handler)
 endfunction
 
 function! gitgutter#shell#kill(id)

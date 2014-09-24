@@ -22,13 +22,7 @@ function! gitgutter#process_buffer(file)
   endif
 endfunction
 
-function! gitgutter#post_hook(result, status, bufnr)
-  if a:status
-    call gitgutter#utility#warn('diff failed')
-    call gitgutter#hunk#reset()
-    return
-  endif
-
+function! gitgutter#post_hook(result, bufnr)
   call gitgutter#highlight#init()
 
   if a:bufnr != bufnr('%')
