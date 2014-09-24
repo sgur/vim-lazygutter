@@ -29,13 +29,12 @@ function! gitgutter#post_hook(result, status, bufnr)
     return
   endif
 
-  if a:bufnr != bufnr('%')
-    call gitgutter#utility#warn(printf('buffer mismatched: %s', bufname(a:bufnr)))
-    call gitgutter#hunk#reset()
-    return
-  endif
-
   call gitgutter#highlight#init()
+
+  if a:bufnr != bufnr('%')
+    " Mismatch occurs in processd buffer and target buffer
+    call gitgutter#utility#set_file(fnamemodify(bufname(a:bufnr), ':p'))
+  endif
 
   let diff = a:result
   let file = fnamemodify(bufname(a:bufnr), ':p')
