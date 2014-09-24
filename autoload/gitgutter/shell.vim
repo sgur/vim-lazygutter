@@ -87,7 +87,9 @@ function! s:system_fallback(cmd, handler)
   else
     let result = system(a:cmd)
   endif
-  call call(a:handler, [result, v:shell_error, bufnr('%')])
+  if !v:shell_error
+    call call(a:handler, [result, v:shell_error, bufnr('%')])
+  endif
   return '+clientserver not found'
 endfunction
 
@@ -106,7 +108,7 @@ endfunction
 
 function! gitgutter#shell#system(cmd, ...)
   let handler = a:0 > 0 ? a:1 : s:default_handler_name()
-  if !has('clientserver') " fallback
+  if !has('clientserver') || empty(v:servername) " fallback
     return s:system_fallback(a:cmd, handler)
   endif
   return s:system(a:cmd, handler)
