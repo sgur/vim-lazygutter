@@ -1,19 +1,23 @@
 let s:hunk_re = '^@@ -\(\d\+\),\?\(\d*\) +\(\d\+\),\?\(\d*\) @@'
 
 
-function! gitgutter#diff#run_diff()
+function! gitgutter#diff#run_diff(lines_of_context, lazy, post_hook)
   " Wrap compound command in parentheses to make Windows happy.
 
   let fname = gitgutter#utility#shellescape(gitgutter#utility#filename())
   let cmd = ''
   for repo in ['hg', 'git']
     if gitgutter#{repo}#is_in_a_repo(fname)
-      let cmd = gitgutter#{repo}#cmd(fname)
+      let cmd = gitgutter#{repo}#cmd(fname, a:lines_of_context)
     endif
   endfor
 
   if !empty(cmd)
-    call gitgutter#shell#system(gitgutter#utility#command_in_directory_of_file(cmd), 'gitgutter#post_hook')
+    if a:lazy
+      call gitgutter#shell#system(gitgutter#utility#command_in_directory_of_file(cmd), a:post_hook)
+    else
+      return gitgutter#utility#system(gitgutter#utility#command_in_directory_of_file(cmd))
+    endif
   endif
 endfunction
 
@@ -154,22 +158,24 @@ function! gitgutter#diff#process_modified_and_removed(modifications, from_count,
   let a:modifications[-1] = [a:to_line + offset - 1, 'modified_removed']
 endfunction
 
-function! gitgutter#diff#generate_diff_for_hunk(hunk, keep_header)
-  let diff = gitgutter#diff#discard_hunks(gitgutter#diff#run_diff(), a:hunk, a:keep_header)
+function! gitgutter#diff#generate_diff_for_hunk(keep_header, lines_of_context)
+  let diff = gitgutter#diff#run_diff(a:lines_of_context, 0, 'gitgutter#diff#post_hook')
+  let diff_for_hunk = gitgutter#diff#discard_hunks(diff, a:keep_header)
   if !a:keep_header
     " Discard summary line
-    let diff = join(split(diff, '\n')[1:-1], "\n")
+    let diff_for_hunk = join(split(diff_for_hunk, '\n')[1:-1], "\n")
   endif
-  return diff
+  return diff_for_hunk
 endfunction
 
-function! gitgutter#diff#discard_hunks(diff, hunk_to_keep, keep_header)
+" diff - with non-zero lines of context
+function! gitgutter#diff#discard_hunks(diff, keep_header)
   let modified_diff = []
   let keep_line = a:keep_header
   for line in split(a:diff, '\n')
     let hunk_info = gitgutter#diff#parse_hunk(line)
     if len(hunk_info) == 4  " start of new hunk
-      let keep_line = (hunk_info == a:hunk_to_keep)
+      let keep_line = gitgutter#hunk#cursor_in_hunk(hunk_info)
     endif
     if keep_line
       call add(modified_diff, line)

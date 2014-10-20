@@ -5,10 +5,10 @@ function! gitgutter#git#is_in_a_repo(file)
   return !empty(s:find_dir_of_file(a:file))
 endfunction
 
-function! gitgutter#git#cmd(file)
+function! gitgutter#git#cmd(file, lines_of_context)
   let check_cmd = printf('git ls-files --error-unmatch %s %s', a:file, s:redir_nulldev)
-  let diff_cmd = printf('git diff --no-ext-diff --no-color -U0 %s %s'
-        \ , g:gitgutter_diff_args, a:file)
+  let diff_cmd = printf('git diff --no-ext-diff --no-color -U%s %s %s'
+        \ , a:lines_of_context, g:gitgutter_diff_args, a:file)
   return printf('(%s && (%s))', check_cmd, diff_cmd)
 endfunction
 
