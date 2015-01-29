@@ -16,7 +16,9 @@ function! gitgutter#process_buffer(file)
     if g:gitgutter_sign_column_always
       call gitgutter#sign#add_dummy_sign()
     endif
-    call gitgutter#diff#run_diff(0, 1, 'gitgutter#post_hook')
+    if gitgutter#utility#has_fresh_changes(a:file)
+      call gitgutter#diff#run_diff(0, 1, 'gitgutter#post_hook')
+    endif
   else
     call gitgutter#hunk#reset()
   endif
