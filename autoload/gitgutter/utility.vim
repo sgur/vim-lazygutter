@@ -33,7 +33,7 @@ function! gitgutter#utility#current_file()
 endfunction
 
 function! gitgutter#utility#set_file(file)
-  let s:file = a:file
+  let s:file = escape(a:file, ',[]{}')
 endfunction
 
 function! gitgutter#utility#file()
