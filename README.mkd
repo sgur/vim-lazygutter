@@ -53,7 +53,7 @@ If you don't have a preferred installation method, I recommend installing [patho
 
 ```
 cd ~/.vim/bundle
-git clone https://github.com/sgur/vim-gitgutter.git
+git clone https://github.com/sgur/vim-lazygutter.git
 ```
 
 Or for [Vundle](https://github.com/gmarik/vundle) users:
