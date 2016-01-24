@@ -11,9 +11,11 @@ let s:is_win = has('win32') || has('win64')
 let s:is_mac = !s:is_win && (has('mac') || has('macunix') || has('gui_macvim')
       \ || (!isdirectory('/proc') && executable('sw_vers')))
 
-if has('gui_running') && s:is_mac
-  if executable('mvim')
+if has('gui_running')
+  if s:is_mac && executable('mvim')
     let s:executable = 'mvim'
+  elseif executable('gvim')
+    let s:executable = 'gvim'
   endif
 elseif executable('vim')
   let s:executable = 'vim'
