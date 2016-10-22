@@ -6,7 +6,7 @@ function! gitgutter#diff#run_diff(lines_of_context, lazy, post_hook)
 
   let fname = gitgutter#utility#shellescape(gitgutter#utility#filename())
   let cmd = ''
-  for repo in ['hg', 'git']
+  for repo in ['hg', 'git', 'perforce']
     if gitgutter#{repo}#is_in_a_repo(fname)
       let cmd = gitgutter#{repo}#cmd(fname, a:lines_of_context)
     endif
