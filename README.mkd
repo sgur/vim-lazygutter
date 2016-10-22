@@ -14,6 +14,7 @@ Changes from original:
 * Remove realtime sign update
 * Remove external grep feature
 * Add support for mercurial repository
+* Add support for Perforce workspaces
 * Lazy update of git gutter signs
 
 Features:
@@ -30,7 +31,7 @@ Features:
 
 Constraints:
 
-* Supports git and mercurial.
+* Supports git, mercurial and perforce.
 * +clientserver required for lazy update.
 
 
